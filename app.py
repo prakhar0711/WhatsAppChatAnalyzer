@@ -20,7 +20,8 @@ if uploaded_file is not None:
 
     # Fetch unique users
     user_list = df['user'].unique().tolist()
-    user_list.remove('group notification')
+    if 'group notification' in user_list:
+        user_list.remove('group notification')
     user_list.sort()
     user_list.insert(0, 'Overall')
     selected_user = st.sidebar.selectbox("Show analysis wrt", user_list)
@@ -49,12 +50,12 @@ if uploaded_file is not None:
         with col1:
             timeline = helper.monthly_timeline(selected_user, df)
             st.header("Monthly Timeline")
-            st.line_chart(timeline.set_index('time')['message'],height=500)
+            st.line_chart(timeline.set_index('time')['message'], height=500)
         with col2:
             # Daily timeline
             daily_timeline = helper.get_daily_timeline(selected_user, df)
             st.header("Daily Timeline")
-            st.line_chart(daily_timeline.set_index('only_date')['message'],height=500)
+            st.line_chart(daily_timeline.set_index('only_date')['message'], height=500)
 
         # Activity map
         st.title("Activity Map")
@@ -62,11 +63,11 @@ if uploaded_file is not None:
         with col1:
             st.header("Most busy day")
             busy_day = helper.week_activity_map(selected_user, df)
-            st.bar_chart(busy_day,height=600)
+            st.bar_chart(busy_day, height=600)
         with col2:
             st.header("Most busy month")
             busy_month = helper.month_activity_map(selected_user, df)
-            st.bar_chart(busy_month,height=600)
+            st.bar_chart(busy_month, height=600)
 
         # Activity heatmap
         user_heatmap = helper.activity_heat_map(selected_user, df)
@@ -81,7 +82,7 @@ if uploaded_file is not None:
             col1, col2 = st.columns(2)
             with col1:
                 st.header('Most Busy Users')
-                st.bar_chart(x,height=600)
+                st.bar_chart(x, height=600)
             with col2:
                 st.header('Percentage of Messages Sent by Each User')
                 st.dataframe(percent_new_df, use_container_width=True, hide_index=True)
@@ -95,7 +96,7 @@ if uploaded_file is not None:
         with col1:
             st.header("Most Common Words")
             most_common_df = helper.most_common_words(selected_user, df)
-            st.bar_chart(most_common_df.set_index('Common Word'),height=500)
+            st.bar_chart(most_common_df.set_index('Common Word'), height=500)
         with col2:
             st.header("Most Common Words by Count")
             st.dataframe(most_common_df, use_container_width=True, hide_index=True)
@@ -111,9 +112,7 @@ if uploaded_file is not None:
         with col2:
             st.dataframe(emoji_df, use_container_width=True, hide_index=True)
 
-
-
-    #sentiment analysis
+    # sentiment analysis
     if st.sidebar.button("Sentiment Analysis"):
         sentiment_df = helper.perform_sentiment_analysis(selected_user, df)
         st.title("Sentiment Analysis")
@@ -121,5 +120,4 @@ if uploaded_file is not None:
 
         sentiment_df = helper.perform_sentiment_analysis(selected_user, df)
         st.title("Sentiment Analysis Visualization")
-        st.bar_chart(sentiment_df['sentiment_polarity'],height=600)
-
+        st.bar_chart(sentiment_df['sentiment_polarity'], height=600)
