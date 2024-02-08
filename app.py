@@ -48,23 +48,13 @@ if uploaded_file is not None:
         col1, col2 = st.columns(2)
         with col1:
             timeline = helper.monthly_timeline(selected_user, df)
-            fig, ax = plt.subplots()
-            ax.plot(timeline['time'], timeline['message'], color='green')
-            plt.xticks(rotation='vertical')
-            ax.set_xlabel('Month')  # Placeholder for x-axis
-            ax.set_ylabel('Number of Messages')
             st.header("Monthly Timeline")
-            st.pyplot(fig, use_container_width=True)
+            st.line_chart(timeline.set_index('time')['message'],height=500)
         with col2:
             # Daily timeline
             daily_timeline = helper.get_daily_timeline(selected_user, df)
-            fig, ax = plt.subplots()
-            ax.plot(daily_timeline['only_date'], daily_timeline['message'], color='red')
-            plt.xticks(rotation='vertical')
-            ax.set_xlabel('Date')  # Placeholder for x-axis
-            ax.set_ylabel('Number of Messages')
             st.header("Daily Timeline")
-            st.pyplot(fig, use_container_width=True)
+            st.line_chart(daily_timeline.set_index('only_date')['message'],height=500)
 
         # Activity map
         st.title("Activity Map")
@@ -72,21 +62,11 @@ if uploaded_file is not None:
         with col1:
             st.header("Most busy day")
             busy_day = helper.week_activity_map(selected_user, df)
-            fig, ax = plt.subplots()
-            ax.bar(busy_day.index, busy_day.values, color=['red', 'green', 'blue', 'orange', 'purple', 'yellow', 'cyan'])
-            plt.xticks(rotation='vertical')
-            ax.set_xlabel('Day')  # Placeholder for x-axis
-            ax.set_ylabel('Number of Messages')
-            st.pyplot(fig, use_container_width=True)
+            st.bar_chart(busy_day,height=600)
         with col2:
             st.header("Most busy month")
             busy_month = helper.month_activity_map(selected_user, df)
-            fig, ax = plt.subplots()
-            ax.bar(busy_month.index, busy_month.values, color=['red', 'green', 'blue', 'orange', 'purple', 'yellow', 'cyan'])
-            plt.xticks(rotation='vertical')
-            ax.set_xlabel('Month')  # Placeholder for x-axis
-            ax.set_ylabel('Number of Messages')
-            st.pyplot(fig, use_container_width=True)
+            st.bar_chart(busy_month,height=600)
 
         # Activity heatmap
         user_heatmap = helper.activity_heat_map(selected_user, df)
@@ -98,15 +78,10 @@ if uploaded_file is not None:
         # Busiest users in the group
         if selected_user == 'Overall':
             x, percent_new_df = helper.most_busy_users(df)
-            fig, ax = plt.subplots()
             col1, col2 = st.columns(2)
             with col1:
                 st.header('Most Busy Users')
-                ax.bar(x.index, x.values, color=['red', 'green', 'blue', 'orange', 'purple', 'yellow', 'cyan'])
-                ax.set_xlabel('User')  # Placeholder for x-axis
-                ax.set_ylabel('Number of Messages')
-                plt.xticks(rotation='vertical')
-                st.pyplot(fig, use_container_width=True)
+                st.bar_chart(x,height=600)
             with col2:
                 st.header('Percentage of Messages Sent by Each User')
                 st.dataframe(percent_new_df, use_container_width=True, hide_index=True)
@@ -114,23 +89,13 @@ if uploaded_file is not None:
         # Wordcloud
         st.header("Wordcloud")
         df_wc = helper.create_wordcloud(selected_user, df)
-        fig, ax = plt.subplots()
-        col1, col2 = st.columns(2)
-        with col1:
-            ax.imshow(df_wc)
-            st.pyplot(fig, use_container_width=True)
+        st.image(df_wc.to_array())
 
-        # Most common words
-        most_common_df = helper.most_common_words(selected_user, df)
-        fig, ax = plt.subplots()
-        ax.barh(most_common_df['Common Word'], most_common_df['Word Count'], color=['red', 'green', 'blue', 'orange', 'purple', 'yellow', 'cyan'])
-        ax.set_xlabel('Average Use')  # Placeholder for x-axis
-        ax.set_ylabel('Common Word')
         col1, col2 = st.columns(2)
         with col1:
             st.header("Most Common Words")
-            plt.xticks(rotation='vertical')
-            st.pyplot(fig, use_container_width=True)
+            most_common_df = helper.most_common_words(selected_user, df)
+            st.bar_chart(most_common_df.set_index('Common Word'),height=500)
         with col2:
             st.header("Most Common Words by Count")
             st.dataframe(most_common_df, use_container_width=True, hide_index=True)
@@ -145,3 +110,16 @@ if uploaded_file is not None:
             st.pyplot(fig, use_container_width=True)
         with col2:
             st.dataframe(emoji_df, use_container_width=True, hide_index=True)
+
+
+
+    #sentiment analysis
+    if st.sidebar.button("Sentiment Analysis"):
+        sentiment_df = helper.perform_sentiment_analysis(selected_user, df)
+        st.title("Sentiment Analysis")
+        st.dataframe(sentiment_df[['message', 'sentiment']])
+
+        sentiment_df = helper.perform_sentiment_analysis(selected_user, df)
+        st.title("Sentiment Analysis Visualization")
+        st.bar_chart(sentiment_df['sentiment'],height=600)
+
