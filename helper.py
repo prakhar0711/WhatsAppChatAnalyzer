@@ -3,10 +3,10 @@ from urlextract import URLExtract
 from wordcloud import wordcloud
 import pandas as pd
 import emoji
-
+import streamlit as st
 extract = URLExtract()
 
-
+@st.cache_data
 def fetch_stats(selected_user, df):
     if selected_user != 'Overall':
         df = df[df['user'] == selected_user]
@@ -29,7 +29,7 @@ def fetch_stats(selected_user, df):
 
     return num_messages, len(words), num_media, len(links)
 
-
+@st.cache_data
 def most_busy_users(df):
     df = df[df['user'] != 'group notification']
     x = df['user'].value_counts().head()
@@ -37,7 +37,7 @@ def most_busy_users(df):
         columns={'index': 'name', 'user': 'percent(%)'})
     return x, df
 
-
+@st.cache_data
 def create_wordcloud(selected_user, df):
     f = open('stop_hinglish.txt', 'r', encoding='utf-8')
     stop_words = f.read()
@@ -46,6 +46,7 @@ def create_wordcloud(selected_user, df):
 
     temp = df[df['user'] != 'group notification']
     temp = temp[temp['message'] != '<Media omitted>\n']
+
 
     def remove_stop_words(message):
         y = []
@@ -59,7 +60,7 @@ def create_wordcloud(selected_user, df):
     df_wc = wc.generate(temp['message'].str.cat(sep=" "))
     return df_wc
 
-
+@st.cache_data
 def most_common_words(selected_user, df):
     f = open('stop_hinglish.txt', 'r', encoding='utf-8')
     stop_words = f.read()
@@ -79,7 +80,7 @@ def most_common_words(selected_user, df):
     most_common_df = most_common_df.rename(columns={0: 'Common Word', 1: 'Word Count'})
     return most_common_df
 
-
+@st.cache_data
 def get_emojis(selected_user, df):
     if selected_user != 'Overall':
         df = df[df['user'] == selected_user]
@@ -91,7 +92,7 @@ def get_emojis(selected_user, df):
     emoji_df = pd.DataFrame(Counter(emojis).most_common(), columns=['Emoji', 'Count'])
     return emoji_df
 
-
+@st.cache_data
 def monthly_timeline(selected_user, df):
     if selected_user != 'Overall':
         df = df[df['user'] == selected_user]
@@ -104,7 +105,7 @@ def monthly_timeline(selected_user, df):
     timeline['time'] = time
     return timeline
 
-
+@st.cache_data
 def get_daily_timeline(selected_user, df):
     if selected_user != 'Overall':
         df = df[df['user'] == selected_user]
@@ -112,16 +113,18 @@ def get_daily_timeline(selected_user, df):
     daily_timeline = df.groupby('only_date').count()['message'].reset_index()
     return daily_timeline
 
-
+@st.cache_data
 def week_activity_map(selected_user, df):
     if selected_user != 'Overall':
         df = df[df['user'] == selected_user]
     return df['day_name'].value_counts()
 
+@st.cache_data
 def month_activity_map(selected_user, df):
     if selected_user != 'Overall':
         df = df[df['user'] == selected_user]
     return df['month'].value_counts()
+
 
 def activity_heat_map(selected_user,df):
     if selected_user != 'Overall':
