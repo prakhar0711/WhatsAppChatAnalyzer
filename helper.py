@@ -156,7 +156,7 @@ def perform_sentiment_analysis(selected_user, df):
     df['message'] = df['message'].apply(lambda x: remove_emojis(x))
 
     # Perform sentiment analysis on each message
-    df['sentiment'] = df['message'].apply(lambda x: TextBlob(x).sentiment.polarity)
+    df['sentiment_polarity'] = df['message'].apply(lambda x: TextBlob(x).sentiment.polarity)
 
     return df
 

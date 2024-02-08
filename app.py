@@ -117,9 +117,9 @@ if uploaded_file is not None:
     if st.sidebar.button("Sentiment Analysis"):
         sentiment_df = helper.perform_sentiment_analysis(selected_user, df)
         st.title("Sentiment Analysis")
-        st.dataframe(sentiment_df[['message', 'sentiment']])
+        st.dataframe(sentiment_df[['message', 'sentiment_polarity']])
 
         sentiment_df = helper.perform_sentiment_analysis(selected_user, df)
         st.title("Sentiment Analysis Visualization")
-        st.bar_chart(sentiment_df['sentiment'],height=600)
+        st.bar_chart(sentiment_df['sentiment_polarity'],height=600)
 
