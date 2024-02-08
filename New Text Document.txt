@@ -1,0 +1,71 @@
+## Implementing Sentiment Analysis in your Whatsapp Chat Analyzer:
+
+Here's how you can integrate sentiment analysis into your existing Whatsapp chat analyzer code:
+
+**1. Choose a Sentiment Analysis Library:**
+
+* **VADER (Valence Aware Dictionary and sEntiment Reasoner):** This lexicon-based approach is a good starting point and easy to implement with libraries like `nltk`.
+* **Flair:** A powerful NLP library offering state-of-the-art pre-trained sentiment analysis models.
+* **TextBlob:** Provides sentiment analysis along with other NLP functionalities.
+
+**2. Modify your `helper.py` script:**
+
+* Add functions to perform sentiment analysis:
+    * Define a function that takes a message as input and returns its sentiment (positive, negative, neutral).
+    * This function can utilize the chosen library to analyze the message text.
+    * Consider different approaches for analyzing messages within a user-specified timeframe or for individual users.
+* Update the `fetch_stats` function:
+    * Calculate and return additional sentiment statistics (e.g., average sentiment score, percentage of positive/negative messages) alongside existing stats.
+
+**3. Update your main script:**
+
+* Add sections to display sentiment analysis results:
+    * After selecting a user or timeframe, call the sentiment analysis functions from `helper.py`.
+    * Display the calculated sentiment statistics (average score, percentages).
+    * Consider visualizing the sentiment distribution using charts or histograms.
+    * Optionally, add a sentiment label (positive, negative, neutral) to each message in the displayed DataFrame.
+
+**Here's an example using VADER and `nltk`:**
+
+```python
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
+
+def analyze_sentiment(message):
+    # Initialize VADER
+    analyzer = SentimentIntensityAnalyzer()
+    # Get sentiment scores
+    sentiment = analyzer.polarity_scores(message)
+    # Classify sentiment
+    if sentiment['compound'] > 0.05:
+        return "Positive"
+    elif sentiment['compound'] < -0.05:
+        return "Negative"
+    else:
+        return "Neutral"
+
+# ... rest of your code
+
+# Update fetch_stats function
+def fetch_stats(selected_user, df):
+    # ... existing code
+    # Calculate sentiment stats
+    average_sentiment = df['message'].apply(analyze_sentiment).mean()
+    percent_positive = df[df['sentiment'] == "Positive"].shape[0] / len(df) * 100
+    percent_negative = df[df['sentiment'] == "Negative"].shape[0] / len(df) * 100
+    # Return all stats
+    return num_messages, words, num_media, num_links, average_sentiment, percent_positive, percent_negative
+
+# ... rest of your code
+
+# Add sentiment analysis section
+if st.sidebar.button("Show Analysis"):
+    # ... existing code
+    # Sentiment analysis
+    average_sentiment, percent_positive, percent_negative = fetch_stats(selected_user, df)
+    st.title("Sentiment Analysis")
+    st.write(f"Average Sentiment: {average_sentiment:.2f}")
+    st.write(f"Positive Messages: {percent_positive:.2f}%")
+    st.write(f"Negative Messages: {percent_negative:.2f}%")
+```
+
+Remember to install required libraries and adapt the code to your specific structure. This is a basic example, and you can further customize it based on your needs and chosen library.
