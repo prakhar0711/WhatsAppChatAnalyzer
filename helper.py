@@ -184,3 +184,23 @@ def remove_emojis(text):
                                u"\u3030"
                                "]+", flags=re.UNICODE)
     return emoji_pattern.sub(r'', text)
+
+# Add the following function to helper.py
+
+def search_keywords(selected_user,df, keyword):
+    """
+    Search for occurrences of a keyword in chat messages.
+
+    Args:
+        df (DataFrame): DataFrame containing chat messages.
+        keyword (str): Keyword to search for.
+
+    Returns:
+        DataFrame: DataFrame containing messages with occurrences of the keyword.
+    """
+    # Case insensitive search for the keyword in message column
+    if selected_user != 'Overall':
+        df = df[df['user'] == selected_user]
+    keyword = keyword.lower()
+    keyword_occurrences = df[df['message'].str.lower().str.contains(keyword, na=False)]
+    return keyword_occurrences

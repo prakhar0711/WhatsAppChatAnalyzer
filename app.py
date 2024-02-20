@@ -26,6 +26,20 @@ if uploaded_file is not None:
     user_list.insert(0, 'Overall')
     selected_user = st.sidebar.selectbox("Show analysis wrt", user_list)
 
+    # Inside your Streamlit app, add the following code for the keyword search feature
+
+    # Keyword search
+    search_keyword = st.sidebar.text_input("Search for keyword")
+    if st.sidebar.button("Search"):
+        # Perform keyword search
+
+        if search_keyword:
+            keyword_results = helper.search_keywords(selected_user, df, search_keyword)
+            st.subheader(f"Messages containing '{search_keyword}':")
+            st.dataframe(keyword_results)
+        else:
+            st.warning("Please enter a keyword to search.")
+
     # Show analysis button
     if st.sidebar.button("Show Analysis"):
         # Stats area
