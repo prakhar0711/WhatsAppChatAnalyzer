@@ -38,7 +38,8 @@ if uploaded_file is not None:
             st.subheader(f"Messages containing '{search_keyword}':")
             st.dataframe(keyword_results)
 
-            sentiment_results = helper.analyze_sentiment_in_keyword_messages(selected_user,df, search_keyword)
+            # Perform sentiment analysis
+            sentiment_results = helper.analyze_sentiment_in_keyword_messages(selected_user, df, search_keyword)
             st.subheader("Sentiment Analysis of Messages containing the keyword:")
             st.dataframe(sentiment_results[['message', 'sentiment_polarity']])
 
