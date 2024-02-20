@@ -37,6 +37,14 @@ if uploaded_file is not None:
             keyword_results = helper.search_keywords(selected_user, df, search_keyword)
             st.subheader(f"Messages containing '{search_keyword}':")
             st.dataframe(keyword_results)
+
+            sentiment_results = helper.analyze_sentiment_in_keyword_messages(selected_user,df, search_keyword)
+            st.subheader("Sentiment Analysis of Messages containing the keyword:")
+            st.dataframe(sentiment_results[['message', 'sentiment_polarity']])
+
+            # Visualize sentiment distribution
+            st.subheader("Sentiment Distribution:")
+            st.bar_chart(sentiment_results['sentiment_polarity'].value_counts())
         else:
             st.warning("Please enter a keyword to search.")
 

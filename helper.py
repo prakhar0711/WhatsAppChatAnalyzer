@@ -204,3 +204,42 @@ def search_keywords(selected_user,df, keyword):
     keyword = keyword.lower()
     keyword_occurrences = df[df['message'].str.lower().str.contains(keyword, na=False)]
     return keyword_occurrences
+
+
+def keyword_sentiment_analysis(keyword_messages):
+    """
+    Perform sentiment analysis on messages containing the searched keyword.
+
+    Args:
+        keyword_messages (DataFrame): DataFrame containing messages containing the searched keyword.
+
+    Returns:
+        DataFrame: DataFrame containing sentiment analysis results for messages containing the keyword.
+    """
+    # Remove <Media omitted> messages
+    keyword_messages = keyword_messages[keyword_messages['message'] != '<Media omitted>\n']
+
+    # Remove emojis from messages
+    keyword_messages['message'] = keyword_messages['message'].apply(remove_emojis)
+
+    # Perform sentiment analysis on each message
+    keyword_messages['sentiment_polarity'] = keyword_messages['message'].apply(lambda x: TextBlob(x).sentiment.polarity)
+
+    return keyword_messages[['message', 'sentiment_polarity']]
+@st.cache_data
+def analyze_sentiment_in_keyword_messages(selected_user,df, keyword):
+    """
+    Perform sentiment analysis on messages containing the searched keyword.
+
+    Args:
+        df (DataFrame): DataFrame containing chat messages.
+        keyword (str): Keyword to search for.
+
+    Returns:
+        DataFrame: DataFrame containing sentiment analysis results for messages containing the keyword.
+    """
+    if selected_user != 'Overall':
+        df = df[df['user'] == selected_user]
+    keyword_messages = search_keywords(selected_user,df, keyword)
+    sentiment_results = keyword_sentiment_analysis(keyword_messages)
+    return sentiment_results
