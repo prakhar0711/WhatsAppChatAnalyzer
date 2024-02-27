@@ -1,8 +1,14 @@
+import os
+import matplotlib.pyplot as plt
+import seaborn as sns
 import streamlit as st
 import preprocessor
 import helper
-import matplotlib.pyplot as plt
-import seaborn as sns
+import pandas as pd
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, classification_report
 
 # Set page configuration and sidebar title
 st.set_page_config(page_title="Whatsapp Chat Analyzer", page_icon=":bar_chart:", layout="wide")
@@ -25,29 +31,6 @@ if uploaded_file is not None:
     user_list.sort()
     user_list.insert(0, 'Overall')
     selected_user = st.sidebar.selectbox("Show analysis wrt", user_list)
-
-    # Inside your Streamlit app, add the following code for the keyword search feature
-
-    # Keyword search
-    search_keyword = st.sidebar.text_input("Search for keyword")
-    if st.sidebar.button("Search"):
-        # Perform keyword search
-
-        if search_keyword:
-            keyword_results = helper.search_keywords(selected_user, df, search_keyword)
-            st.subheader(f"Messages containing '{search_keyword}':")
-            st.dataframe(keyword_results)
-
-            # Perform sentiment analysis
-            sentiment_results = helper.analyze_sentiment_in_keyword_messages(selected_user, df, search_keyword)
-            st.subheader("Sentiment Analysis of Messages containing the keyword:")
-            st.dataframe(sentiment_results[['message', 'sentiment_polarity']])
-
-            # Visualize sentiment distribution
-            st.subheader("Sentiment Distribution:")
-            st.bar_chart(sentiment_results['sentiment_polarity'].value_counts())
-        else:
-            st.warning("Please enter a keyword to search.")
 
     # Show analysis button
     if st.sidebar.button("Show Analysis"):
@@ -135,12 +118,41 @@ if uploaded_file is not None:
         with col2:
             st.dataframe(emoji_df, use_container_width=True, hide_index=True)
 
-    # sentiment analysis
-    if st.sidebar.button("Sentiment Analysis"):
-        sentiment_df = helper.perform_sentiment_analysis(selected_user, df)
-        st.title("Sentiment Analysis")
-        st.dataframe(sentiment_df[['message', 'sentiment_polarity']])
+        training_data = helper.generate_training_data(df, 'positive-words.txt', 'negative-words.txt')
 
-        sentiment_df = helper.perform_sentiment_analysis(selected_user, df)
-        st.title("Sentiment Analysis Visualization")
-        st.bar_chart(sentiment_df['sentiment_polarity'], height=600)
+        # Display training data
+        st.header("Training Data for Sentiment Analysis")
+        st.dataframe(training_data, use_container_width=True)
+        training_data['message'] = training_data['message'].astype(str)
+        training_data['sentiment'] = training_data['sentiment'].astype(str)
+        file_path = 'training_data.csv'
+        if not os.path.exists(file_path):
+            # If the file doesn't exist, write the header
+            training_data.to_csv(file_path, index=False)
+        else:
+            # If the file exists, append without writing the header
+            with open(file_path, 'a', encoding='utf-8') as file:
+                training_data.to_csv(file, header=False, index=False)
+
+        X = training_data['message']
+        y = training_data['sentiment']
+
+        # Convert text data into numerical features using CountVectorizer
+        vectorizer = CountVectorizer()
+        X_vec = vectorizer.fit_transform(X)
+
+        # Split the data into training and testing sets
+        X_train, X_test, y_train, y_test = train_test_split(X_vec, y, test_size=0.2, random_state=42)
+
+        # Train a logistic regression model
+        model = LogisticRegression()
+        model.fit(X_train, y_train)
+
+        # Evaluate the model
+        y_pred = model.predict(X_test)
+        accuracy = accuracy_score(y_test, y_pred)
+        report = classification_report(y_test, y_pred)
+
+        st.write("Model Accuracy:", accuracy)
+        st.write("Classification Report:")
+        st.write(report)

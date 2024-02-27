@@ -4,7 +4,7 @@ from wordcloud import wordcloud
 import pandas as pd
 import emoji
 import streamlit as st
-from textblob import TextBlob
+from collections import defaultdict
 import re
 
 extract = URLExtract()
@@ -143,24 +143,6 @@ def activity_heat_map(selected_user, df):
     user_heatmap = df.pivot_table(index='day_name', columns='time_period', values='message', aggfunc='count').fillna(0)
     return user_heatmap
 
-
-@st.cache_data
-def perform_sentiment_analysis(selected_user, df):
-    if selected_user != 'Overall':
-        df = df[df['user'] == selected_user]
-
-    # Remove <Media omitted> messages
-    df = df[df['message'] != '<Media omitted>\n']
-
-    # Remove emojis from messages
-    df['message'] = df['message'].apply(lambda x: remove_emojis(x))
-
-    # Perform sentiment analysis on each message
-    df['sentiment_polarity'] = df['message'].apply(lambda x: TextBlob(x).sentiment.polarity)
-
-    return df
-
-
 def remove_emojis(text):
     # Pattern to remove emojis
     emoji_pattern = re.compile("["
@@ -185,61 +167,60 @@ def remove_emojis(text):
                                "]+", flags=re.UNICODE)
     return emoji_pattern.sub(r'', text)
 
-# Add the following function to helper.py
 
-def search_keywords(selected_user,df, keyword):
-    """
-    Search for occurrences of a keyword in chat messages.
-
-    Args:
-        df (DataFrame): DataFrame containing chat messages.
-        keyword (str): Keyword to search for.
-
-    Returns:
-        DataFrame: DataFrame containing messages with occurrences of the keyword.
-    """
-    # Case insensitive search for the keyword in message column
-    if selected_user != 'Overall':
-        df = df[df['user'] == selected_user]
-    keyword = keyword.lower()
-    keyword_occurrences = df[df['message'].str.lower().str.contains(keyword, na=False)]
-    return keyword_occurrences
+# Add necessary imports
+from collections import defaultdict
+import pandas as pd
 
 
-def keyword_sentiment_analysis(keyword_messages):
-    """
-    Perform sentiment analysis on messages containing the searched keyword.
+# Read positive and negative words files
+def read_sentiment_words(positive_words_file, negative_words_file):
+    with open(positive_words_file, 'r', encoding='utf-8') as file:
+        positive_words = file.read().splitlines()
 
-    Args:
-        keyword_messages (DataFrame): DataFrame containing messages containing the searched keyword.
+    with open(negative_words_file, 'r', encoding='utf-8') as file:
+        negative_words = file.read().splitlines()
 
-    Returns:
-        DataFrame: DataFrame containing sentiment analysis results for messages containing the keyword.
-    """
-    # Remove <Media omitted> messages
-    keyword_messages = keyword_messages[keyword_messages['message'] != '<Media omitted>\n']
+    return positive_words, negative_words
 
-    # Remove emojis from messages
-    keyword_messages['message'] = keyword_messages['message'].apply(remove_emojis)
 
-    # Perform sentiment analysis on each message
-    keyword_messages['sentiment_polarity'] = keyword_messages['message'].apply(lambda x: TextBlob(x).sentiment.polarity)
+# Assign sentiment label to messages
+def assign_sentiment_label(message, positive_words, negative_words):
+    positive_count = sum(1 for word in message.split() if word in positive_words)
+    negative_count = sum(1 for word in message.split() if word in negative_words)
 
-    return keyword_messages[['message', 'sentiment_polarity']]
-@st.cache_data
-def analyze_sentiment_in_keyword_messages(selected_user,df, keyword):
-    """
-    Perform sentiment analysis on messages containing the searched keyword.
+    if positive_count > negative_count:
+        return 'positive'
+    elif negative_count > positive_count:
+        return 'negative'
+    else:
+        return 'neutral'
 
-    Args:
-        df (DataFrame): DataFrame containing chat messages.
-        keyword (str): Keyword to search for.
 
-    Returns:
-        DataFrame: DataFrame containing sentiment analysis results for messages containing the keyword.
-    """
-    if selected_user != 'Overall':
-        df = df[df['user'] == selected_user]
-    keyword_messages = search_keywords(selected_user,df, keyword)
-    sentiment_results = keyword_sentiment_analysis(keyword_messages)
-    return sentiment_results
+# Generate training data for sentiment analysis
+def generate_training_data(df, positive_words_file, negative_words_file):
+    positive_words, negative_words = read_sentiment_words(positive_words_file, negative_words_file)
+    df = df[df['message'] != '<Media omitted>\n']
+    training_data = defaultdict(list)
+    for message in df['message']:
+        # Remove emojis
+        message = remove_emojis(message)
+        # Remove links
+        message = remove_links(message)
+        # Remove numbers
+        message = remove_numbers(message)
+        sentiment_label = assign_sentiment_label(message, positive_words, negative_words)
+        training_data['message'].append(message)
+        training_data['sentiment'].append(sentiment_label)
+
+    training_df = pd.DataFrame(training_data)
+    return training_df
+
+    training_df = pd.DataFrame(training_data)
+    return training_df
+
+def remove_links(text):
+    return re.sub(r'http\S+', '', text)
+
+def remove_numbers(text):
+    return re.sub(r'\d+', '', text)
