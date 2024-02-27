@@ -122,10 +122,11 @@ if uploaded_file is not None:
         training_data = helper.generate_training_data(df, 'positive-words.txt', 'negative-words.txt')
 
         # Display training data
-        st.header("Training Data for Sentiment Analysis")
-        st.dataframe(training_data, use_container_width=True)
+
         training_data['message'] = training_data['message'].astype(str)
         training_data['sentiment'] = training_data['sentiment'].astype(str)
+        st.header("Training Data for Sentiment Analysis")
+        st.dataframe(training_data, use_container_width=True)
         file_path = 'training_data.csv'
         if not os.path.exists(file_path):
             # If the file doesn't exist, write the header
