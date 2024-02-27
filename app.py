@@ -1,5 +1,4 @@
 import os
-
 import matplotlib.pyplot as plt
 import seaborn as sns
 import streamlit as st
@@ -7,7 +6,6 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, classification_report
 from sklearn.model_selection import train_test_split
-
 import helper
 import preprocessor
 
@@ -18,6 +16,10 @@ st.sidebar.title("Whatsapp Chat Analyzer")
 
 # Upload file
 uploaded_file = st.sidebar.file_uploader("Choose a file")
+# Add a checkbox for user consent
+consent_given = st.sidebar.checkbox("Give consent for training data usage.Your chats wont be uploaded to the internet.It will just be used to enhance our training model.This will help us improve the accuracy of our models")
+
+# Append user chat to training data if consent is given
 if uploaded_file is not None:
     bytes_data = uploaded_file.getvalue()
     data = bytes_data.decode('utf-8')
@@ -119,42 +121,78 @@ if uploaded_file is not None:
         with col2:
             st.dataframe(emoji_df, use_container_width=True, hide_index=True)
 
-        training_data = helper.generate_training_data(df, 'positive-words.txt', 'negative-words.txt','stop_hinglish.txt')
+        # Sentiment Analysis
+        # Train a logistic regression model only if consent is given
+        if consent_given:
+            # Append data to training_data.csv
+            training_data = helper.generate_training_data(df, 'positive-words.txt', 'negative-words.txt','stop_hinglish.txt')
 
-        # Display training data
+            # Display training data
+            training_data['message'] = training_data['message'].astype(str)
+            training_data['sentiment'] = training_data['sentiment'].astype(str)
+            st.header("Training Data for Sentiment Analysis")
+            st.dataframe(training_data, use_container_width=True)
+            file_path = 'training_data.csv'
+            if not os.path.exists(file_path):
+                # If the file doesn't exist, write the header
+                training_data.to_csv(file_path, index=False)
+            else:
+                # If the file exists, append without writing the header
+                with open(file_path, 'a', encoding='utf-8') as file:
+                    training_data.to_csv(file, header=False, index=False)
 
-        training_data['message'] = training_data['message'].astype(str)
-        training_data['sentiment'] = training_data['sentiment'].astype(str)
-        st.header("Training Data for Sentiment Analysis")
-        st.dataframe(training_data, use_container_width=True)
-        file_path = 'training_data.csv'
-        if not os.path.exists(file_path):
-            # If the file doesn't exist, write the header
-            training_data.to_csv(file_path, index=False)
+            X = training_data['message']
+            y = training_data['sentiment']
+
+            # Convert text data into numerical features using CountVectorizer
+            vectorizer = CountVectorizer()
+            X_vec = vectorizer.fit_transform(X)
+
+            # Split the data into training and testing sets
+            X_train, X_test, y_train, y_test = train_test_split(X_vec, y, test_size=0.2, random_state=42)
+
+            # Train a logistic regression model
+            model = LogisticRegression()
+            model.fit(X_train, y_train)
+
+            # Evaluate the model
+            y_pred = model.predict(X_test)
+            accuracy = accuracy_score(y_test, y_pred)
+            report = classification_report(y_test, y_pred)
+
+            st.write("Model Accuracy:", accuracy)
+            st.write("Classification Report:")
+            st.write(report)
         else:
-            # If the file exists, append without writing the header
-            with open(file_path, 'a', encoding='utf-8') as file:
-                training_data.to_csv(file, header=False, index=False)
+            training_data = helper.generate_training_data(df, 'positive-words.txt', 'negative-words.txt',
+                                                          'stop_hinglish.txt')
 
-        X = training_data['message']
-        y = training_data['sentiment']
+            # Display training data
+            training_data['message'] = training_data['message'].astype(str)
+            training_data['sentiment'] = training_data['sentiment'].astype(str)
+            st.header("Training Data for Sentiment Analysis")
+            st.dataframe(training_data, use_container_width=True)
+            file_path = 'training_data.csv'
 
-        # Convert text data into numerical features using CountVectorizer
-        vectorizer = CountVectorizer()
-        X_vec = vectorizer.fit_transform(X)
+            X = training_data['message']
+            y = training_data['sentiment']
 
-        # Split the data into training and testing sets
-        X_train, X_test, y_train, y_test = train_test_split(X_vec, y, test_size=0.2, random_state=42)
+            # Convert text data into numerical features using CountVectorizer
+            vectorizer = CountVectorizer()
+            X_vec = vectorizer.fit_transform(X)
 
-        # Train a logistic regression model
-        model = LogisticRegression()
-        model.fit(X_train, y_train)
+            # Split the data into training and testing sets
+            X_train, X_test, y_train, y_test = train_test_split(X_vec, y, test_size=0.2, random_state=42)
 
-        # Evaluate the model
-        y_pred = model.predict(X_test)
-        accuracy = accuracy_score(y_test, y_pred)
-        report = classification_report(y_test, y_pred)
+            # Train a logistic regression model
+            model = LogisticRegression()
+            model.fit(X_train, y_train)
 
-        st.write("Model Accuracy:", accuracy)
-        st.write("Classification Report:")
-        st.write(report)
+            # Evaluate the model
+            y_pred = model.predict(X_test)
+            accuracy = accuracy_score(y_test, y_pred)
+            report = classification_report(y_test, y_pred)
+
+            st.write("Model Accuracy:", accuracy)
+            st.write("Classification Report:")
+            st.write(report)
