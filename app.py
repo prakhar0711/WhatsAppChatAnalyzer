@@ -119,7 +119,7 @@ if uploaded_file is not None:
         with col2:
             st.dataframe(emoji_df, use_container_width=True, hide_index=True)
 
-        training_data = helper.generate_training_data(df, 'positive-words.txt', 'negative-words.txt')
+        training_data = helper.generate_training_data(df, 'positive-words.txt', 'negative-words.txt','stop_hinglish.txt')
 
         # Display training data
 

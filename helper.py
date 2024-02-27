@@ -194,10 +194,20 @@ def assign_sentiment_label(message, positive_words, negative_words):
 
 
 # Generate training data for sentiment analysis
-def generate_training_data(df, positive_words_file, negative_words_file):
+def read_hinglish_stop_words(stop_words_file):
+    with open(stop_words_file, 'r', encoding='utf-8') as file:
+        stop_words = file.read().splitlines()
+    return stop_words
+
+
+# Generate training data for sentiment analysis
+def generate_training_data(df, positive_words_file, negative_words_file, hinglish_stop_words_file):
     positive_words, negative_words = read_sentiment_words(positive_words_file, negative_words_file)
+    hinglish_stop_words = read_hinglish_stop_words(hinglish_stop_words_file)
+
     df = df[df['message'] != '<Media omitted>\n']
     training_data = defaultdict(list)
+
     for message in df['message']:
         # Remove emojis
         message = remove_emojis(message)
@@ -205,12 +215,23 @@ def generate_training_data(df, positive_words_file, negative_words_file):
         message = remove_links(message)
         # Remove numbers
         message = remove_numbers(message)
+
+        # Remove Hinglish stop words
+        message = remove_hinglish_stop_words(message, hinglish_stop_words)
+
         sentiment_label = assign_sentiment_label(message, positive_words, negative_words)
         training_data['message'].append(message)
         training_data['sentiment'].append(sentiment_label)
 
     training_df = pd.DataFrame(training_data)
     return training_df
+
+
+# Function to remove Hinglish stop words
+def remove_hinglish_stop_words(text, stop_words):
+    words = text.split()
+    filtered_words = [word for word in words if word.lower() not in stop_words]
+    return ' '.join(filtered_words)
 
 
 def remove_links(text):
