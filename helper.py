@@ -143,6 +143,7 @@ def activity_heat_map(selected_user, df):
     user_heatmap = df.pivot_table(index='day_name', columns='time_period', values='message', aggfunc='count').fillna(0)
     return user_heatmap
 
+
 def remove_emojis(text):
     # Pattern to remove emojis
     emoji_pattern = re.compile("["
@@ -166,6 +167,7 @@ def remove_emojis(text):
                                u"\u3030"
                                "]+", flags=re.UNICODE)
     return emoji_pattern.sub(r'', text)
+
 
 # Read positive and negative words files
 def read_sentiment_words(positive_words_file, negative_words_file):
@@ -210,11 +212,10 @@ def generate_training_data(df, positive_words_file, negative_words_file):
     training_df = pd.DataFrame(training_data)
     return training_df
 
-    training_df = pd.DataFrame(training_data)
-    return training_df
 
 def remove_links(text):
     return re.sub(r'http\S+', '', text)
+
 
 def remove_numbers(text):
     return re.sub(r'\d+', '', text)

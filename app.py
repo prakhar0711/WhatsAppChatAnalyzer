@@ -1,14 +1,15 @@
 import os
+
 import matplotlib.pyplot as plt
 import seaborn as sns
 import streamlit as st
-import preprocessor
-import helper
-import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, classification_report
+from sklearn.model_selection import train_test_split
+
+import helper
+import preprocessor
 
 # Set page configuration and sidebar title
 st.set_page_config(page_title="Whatsapp Chat Analyzer", page_icon=":bar_chart:", layout="wide")
