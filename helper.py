@@ -167,12 +167,6 @@ def remove_emojis(text):
                                "]+", flags=re.UNICODE)
     return emoji_pattern.sub(r'', text)
 
-
-# Add necessary imports
-from collections import defaultdict
-import pandas as pd
-
-
 # Read positive and negative words files
 def read_sentiment_words(positive_words_file, negative_words_file):
     with open(positive_words_file, 'r', encoding='utf-8') as file:
