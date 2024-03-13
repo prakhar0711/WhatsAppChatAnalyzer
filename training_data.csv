@@ -77,11 +77,11 @@ message,sentiment
 "Ho gaya operation didi ka phone aaya tha
 ",neutral
 "acche se hogaya stone was very big in size
-",neutral
+",positive
 "Great didi
-",neutral
+",positive
 "Ho gya achay s tension bhut tha Dr Priya s kafi help or support hua aagy care kerna hai Thanks to God
-",neutral
+",positive
 "Laxman khiria doctor ka pic jo operation kiy hai 
 ",neutral
 "Tension tha sab log ko kra liy hogya thanks to Godab aagy care kerna hai mujhe 
@@ -119,7 +119,7 @@ message,sentiment
 "Tushar Maine nahi Kiya hai yeh karnama Mr.Akshat Raj ka hai
 ",neutral
 "Mujhe pata hai mama ye kaam jumbo ka hi ho sakta
-",neutral
+",positive
 "Haaaaa
 ",neutral
 "Mera dono beta Hera hai understanding m nature m behaviour m Study m Jo bi manjil achiv kry future m carrier God help and bless my kids 
@@ -239,9 +239,9 @@ Deepak jha
 "I'll call I'm eating
 ",neutral
 "Sorry
-",neutral
+",positive
 "I hope u good?
-",neutral
+",positive
 "Kya khaa rhe ho ji
 ",neutral
 "Yeahh u?
@@ -319,7 +319,7 @@ Deepak jha
 "Neend aaraha
 ",neutral
 "I'm sorry
-",negative
+",positive
 "Kyu
 ",neutral
 "I kept u waiting
@@ -766,7 +766,7 @@ Deepak jha
 "Nikal gaya
 ",neutral
 "I'm so sorry
-",negative
+",positive
 "You got this
 ",neutral
 "All the best
@@ -834,11 +834,11 @@ Deepak jha
 "I will feel scared
 ",negative
 "I am so sorry
-",negative
+",positive
 "I just woke up
 ",neutral
 "I am sorry baccha
-",negative
+",positive
 "No issues
 ",negative
 "Aayu pick once
@@ -972,7 +972,7 @@ Deepak jha
 "Chalo happy and safe journey
 ",positive
 "I am sorry i fell asleep again
-",negative
+",neutral
 "It's okay babe
 ",neutral
 "Reached
@@ -1016,7 +1016,7 @@ Deepak jha
 "No jaan I was just off my phone
 ",neutral
 "Still I'm sorry sweetheart
-",neutral
+",positive
 "At  i had texted you you even sent me reels after that and i had seen you online that time
 ",neutral
 "Now also
@@ -1026,13 +1026,13 @@ Deepak jha
 "I was just having hard time processing everything
 ",negative
 "babu im sorry
-",negative
+",positive
 "When are you calling
 ",neutral
 "i cant babe mum dad sleeping
 ",neutral
 "im sorry jana
-",negative
+",positive
 "Mute?
 ",neutral
 "bachac
