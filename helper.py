@@ -224,6 +224,8 @@ def generate_training_data(df, positive_words_file, negative_words_file, hinglis
         training_data['sentiment'].append(sentiment_label)
 
     training_df = pd.DataFrame(training_data)
+    # remove empty messages and then only return the dataframe
+    # training_df = training_df[training_df['message'] != '']
     return training_df
 
 
