@@ -8,6 +8,16 @@ from sklearn.metrics import accuracy_score, classification_report
 from sklearn.model_selection import train_test_split
 import helper
 import preprocessor
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.svm import SVC
+
+models = {
+    'Logistic Regression': LogisticRegression(),
+    'Random Forest': RandomForestClassifier(),
+    'Multinomial Naive Bayes': MultinomialNB(),
+    'Support Vector Machine': SVC()
+}
 
 # Set page configuration and sidebar title
 st.set_page_config(page_title="Whatsapp Chat Analyzer", page_icon=":bar_chart:", layout="wide")
@@ -136,18 +146,20 @@ if uploaded_file is not None:
         X_train, X_test, y_train, y_test = train_test_split(X_vec, y, test_size=0.2, random_state=42)
 
         # Train a logistic regression model
-        model = LogisticRegression()
-        model.fit(X_train, y_train)
+        for model_name, model in models.items():
+            st.write(f"Evaluating {model_name}...")
 
-        # Evaluate the model
-        y_pred = model.predict(X_test)
-        accuracy = accuracy_score(y_test, y_pred)
-        report = classification_report(y_test, y_pred)
+            # Train the model
+            model.fit(X_train, y_train)
 
-        st.write("Model Accuracy:", accuracy)
-        st.write("Classification Report:")
-        st.write(report)
+            # Evaluate the model
+            y_pred = model.predict(X_test)
+            accuracy = accuracy_score(y_test, y_pred)
+            report = classification_report(y_test, y_pred)
 
+            st.write(f"{model_name} Accuracy:", accuracy)
+            st.write(f"{model_name} Classification Report:")
+            st.write(report)
         if consent_given:
             # Append data to training_data.csv if consent is given
             file_path = 'training_data.csv'
