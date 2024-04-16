@@ -12,6 +12,59 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn.svm import SVC
 import helper
 import preprocessor
+from textblob import TextBlob
+
+def calculate_accuracy(textblob_sentiments, ml_sentiments):
+    """
+    Calculate the accuracy of ML model predictions compared to TextBlob predictions.
+    """
+    correct_predictions = sum(1 for tb_sentiment, ml_sentiment in zip(textblob_sentiments, ml_sentiments) if tb_sentiment == ml_sentiment)
+    total_predictions = len(textblob_sentiments)
+    accuracy = correct_predictions / total_predictions
+    return accuracy
+
+def display_accuracy_comparison(textblob_sentiments, ml_sentiments):
+    """
+    Display the accuracy comparison between ML models and TextBlob.
+    """
+    comparison_results = {}
+    for model_name, ml_sentiment in ml_sentiments.items():
+        accuracy = calculate_accuracy(textblob_sentiments, ml_sentiment)
+        comparison_results[model_name] = accuracy
+    return comparison_results
+def textblob_sentiment_analysis(messages):
+    """
+    Perform sentiment analysis using TextBlob.
+    """
+    sentiments = []
+    for message in messages:
+        blob = TextBlob(message)
+        polarity = blob.sentiment.polarity
+        if polarity > 0:
+            sentiment = 'positive'
+        elif polarity < 0:
+            sentiment = 'negative'
+        else:
+            sentiment = 'neutral'
+        sentiments.append(sentiment)
+    return sentiments
+def compare_sentiment_analysis(textblob_sentiments, ml_sentiments, messages):
+    """
+    Compare sentiment analysis results from TextBlob with ML models.
+    """
+    min_length = min(len(textblob_sentiments), min(len(sentiments) for sentiments in ml_sentiments.values()))
+    comparison_results = {}
+    for model_name, ml_sentiment in ml_sentiments.items():
+        comparison_df = pd.DataFrame({
+            'Message': messages[:min_length],
+            'TextBlob': textblob_sentiments[:min_length],
+            f'{model_name}': ml_sentiment[:min_length]
+        })
+        comparison_results[model_name] = comparison_df
+    return comparison_results
+
+
+
 
 def train_models(X_train, y_train, models):
     """
@@ -173,13 +226,29 @@ def main():
                 else:
                     with open(file_path, 'a', encoding='utf-8') as file:
                         training_data.to_csv(file, mode='a', header=False, index=False)
+            textblob_sentiments = textblob_sentiment_analysis(df['message'])
 
-            # Keyword Search Functionality
-            st.header("Keyword Search")
-            keyword = st.text_input("Enter a keyword")
-            if st.button("Search"):
-                if keyword:
-                    search_results = helper.search_keyword(keyword, df)
+            # Sentiment analysis using ML models
+            ml_sentiments = {}
+            for model_name, model in trained_models.items():
+                ml_sentiments[model_name] = model.predict(X_vec)
+
+            # Compare sentiment analysis results
+            comparison_results = compare_sentiment_analysis(textblob_sentiments, ml_sentiments, df['message'])
+
+            # Display comparison results
+            st.header("Comparison with TextBlob")
+            for model_name, comparison_df in comparison_results.items():
+                st.subheader(f"Comparison with {model_name}")
+                st.dataframe(comparison_df)
+            comparison_results = compare_sentiment_analysis(textblob_sentiments, ml_sentiments, df['message'])
+
+            # Display accuracy comparison
+            accuracy_comparison = display_accuracy_comparison(textblob_sentiments, ml_sentiments)
+            st.header("Accuracy Comparison with TextBlob")
+            for model_name, accuracy in accuracy_comparison.items():
+                st.write(f"{model_name}: {accuracy:.2%}")
+
 
 if __name__ == "__main__":
     main()
