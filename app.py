@@ -14,6 +14,7 @@ import helper
 import preprocessor
 from textblob import TextBlob
 
+
 def calculate_accuracy(textblob_sentiments, ml_sentiments):
     """
     Calculate the accuracy of ML model predictions compared to TextBlob predictions.
@@ -22,6 +23,7 @@ def calculate_accuracy(textblob_sentiments, ml_sentiments):
     total_predictions = len(textblob_sentiments)
     accuracy = correct_predictions / total_predictions
     return accuracy
+
 
 def display_accuracy_comparison(textblob_sentiments, ml_sentiments):
     """
@@ -32,6 +34,8 @@ def display_accuracy_comparison(textblob_sentiments, ml_sentiments):
         accuracy = calculate_accuracy(textblob_sentiments, ml_sentiment)
         comparison_results[model_name] = accuracy
     return comparison_results
+
+
 def textblob_sentiment_analysis(messages):
     """
     Perform sentiment analysis using TextBlob.
@@ -48,6 +52,8 @@ def textblob_sentiment_analysis(messages):
             sentiment = 'neutral'
         sentiments.append(sentiment)
     return sentiments
+
+
 def compare_sentiment_analysis(textblob_sentiments, ml_sentiments, messages):
     """
     Compare sentiment analysis results from TextBlob with ML models.
@@ -63,6 +69,7 @@ def compare_sentiment_analysis(textblob_sentiments, ml_sentiments, messages):
         comparison_results[model_name] = comparison_df
     return comparison_results
 
+
 def train_models(X_train, y_train, models):
     """
     Train machine learning models.
@@ -73,6 +80,7 @@ def train_models(X_train, y_train, models):
         model.fit(X_train, y_train)
         trained_models[model_name] = model
     return trained_models
+
 
 def evaluate_models(trained_models, X_test, y_test):
     """
@@ -87,6 +95,7 @@ def evaluate_models(trained_models, X_test, y_test):
         report_df = pd.DataFrame(report).transpose()
         st.info(f"{model_name} Classification Report:")
         st.table(report_df)
+
 
 def main():
     models = {
@@ -238,7 +247,6 @@ def main():
             for model_name, comparison_df in comparison_results.items():
                 st.subheader(f"Comparison with {model_name}")
                 st.dataframe(comparison_df)
-            comparison_results = compare_sentiment_analysis(textblob_sentiments, ml_sentiments, df['message'])
 
             # Display accuracy comparison
             accuracy_comparison = display_accuracy_comparison(textblob_sentiments, ml_sentiments)
