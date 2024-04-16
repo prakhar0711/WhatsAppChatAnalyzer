@@ -67,6 +67,11 @@ def main():
         user_list.sort()
         user_list.insert(0, 'Overall')
         selected_user = st.sidebar.selectbox("Show analysis wrt", user_list)
+        st.header("Keyword Search")
+        keyword = st.text_input("Enter a keyword:")
+        if keyword:
+            filtered_messages = df[df['message'].str.contains(keyword, case=False)]
+            st.dataframe(filtered_messages, use_container_width=True)
 
         if st.sidebar.button("Show Analysis"):
             num_messages, words, num_media, num_links = helper.fetch_stats(selected_user, df)
@@ -168,6 +173,13 @@ def main():
                 else:
                     with open(file_path, 'a', encoding='utf-8') as file:
                         training_data.to_csv(file, mode='a', header=False, index=False)
+
+            # Keyword Search Functionality
+            st.header("Keyword Search")
+            keyword = st.text_input("Enter a keyword")
+            if st.button("Search"):
+                if keyword:
+                    search_results = helper.search_keyword(keyword, df)
 
 if __name__ == "__main__":
     main()
