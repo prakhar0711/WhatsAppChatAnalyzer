@@ -63,9 +63,6 @@ def compare_sentiment_analysis(textblob_sentiments, ml_sentiments, messages):
         comparison_results[model_name] = comparison_df
     return comparison_results
 
-
-
-
 def train_models(X_train, y_train, models):
     """
     Train machine learning models.
